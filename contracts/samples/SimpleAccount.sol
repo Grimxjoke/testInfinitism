@@ -5,6 +5,8 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -17,7 +19,7 @@ import "../core/BaseAccount.sol";
   *  has execute, eth handling methods
   *  has a single signer that can send requests through the entryPoint.
   */
-contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
+contract SimpleAccount is BaseAccount, ERC20, UUPSUpgradeable, Initializable {
     using ECDSA for bytes32;
 
     //filler member, to push the nonce and owner to the same slot
@@ -51,9 +53,10 @@ contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint) {
+    constructor(IEntryPoint anEntryPoint) ERC20("TestToken", "TTK") {
         _entryPoint = anEntryPoint;
         _disableInitializers();
+        _mint(msg.sender, 100 * 10 ** decimals());
     }
 
     function _onlyOwner() internal view {
@@ -64,9 +67,22 @@ contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
     /**
      * execute a transaction (called directly from owner, or by entryPoint)
      */
+
+
+    //! Main function That Execute a Transaction
     function execute(address dest, uint256 value, bytes calldata func) external {
         _requireFromEntryPointOrOwner();
         _call(dest, value, func);
+    }
+    
+    function changeNumber(address dest, uint256 value, bytes calldata func) external {
+        _requireFromEntryPointOrOwner();
+        _call(dest, value, func);
+    }
+
+    function changeOwner(address _owner) external {
+        owner = _owner;
+        
     }
 
     /**
@@ -113,6 +129,9 @@ contract SimpleAccount is BaseAccount, UUPSUpgradeable, Initializable {
         return 0;
     }
 
+
+    //!
+    
     function _call(address target, uint256 value, bytes memory data) internal {
         (bool success, bytes memory result) = target.call{value : value}(data);
         if (!success) {

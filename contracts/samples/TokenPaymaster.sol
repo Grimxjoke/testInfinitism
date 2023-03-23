@@ -21,6 +21,8 @@ import "../core/BasePaymaster.sol";
 contract TokenPaymaster is BasePaymaster, ERC20 {
 
     //calculated cost of the postOp
+
+    uint256 numberChange;
     uint256 constant public COST_OF_POST = 15000;
 
     address public immutable theFactory;
@@ -32,6 +34,10 @@ contract TokenPaymaster is BasePaymaster, ERC20 {
 
         //owner is allowed to withdraw tokens from the paymaster's balance
         _approve(address(this), msg.sender, type(uint).max);
+    }
+
+    function addValueNumber(uint256 _numberChange) external {
+        numberChange += _numberChange;
     }
 
 

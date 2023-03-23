@@ -21,6 +21,12 @@ abstract contract BaseAccount is IAccount {
     // equivalent to _packValidationData(true,0,0);
     uint256 constant internal SIG_VALIDATION_FAILED = 1;
 
+    uint256 numberChange;
+
+    function addValueNumber(uint256 _numberChange) external {
+        numberChange += _numberChange;
+    }
+
     /**
      * return the account nonce.
      * subclass should return a nonce value that is used both by _validateAndUpdateNonce, and by the external provider (to read the current nonce)
